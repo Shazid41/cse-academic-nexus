@@ -1,36 +1,47 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CSE Academic Nexus
 
-## Getting Started
+Production-ready Next.js App Router portal for BSc CSE academic resources.
 
-First, run the development server:
+## Features
+
+- Firebase Authentication: Google, email/password, forgot password, email verification.
+- Role-based access: students read content, admins manage content.
+- Firestore collections: `users`, `roles`, `semesters`, `subjects`, `courseDetails`, `resources`, `settings`.
+- Firebase Storage uploads for class routine and exam routine/notice images.
+- Semester dashboard, course details pages, instant course search, profile and recent courses.
+- Admin CMS for homepage text, routine images, subject details, Google Drive links, deletion, and user roles.
+- Firestore and Storage security rules included.
+- Responsive light UI with dark mode.
+
+## Setup
+
+1. Create a Firebase project.
+2. Enable Authentication providers: Email/Password and Google.
+3. Create Firestore Database and Firebase Storage.
+4. Copy `.env.example` to `.env.local` and fill in the Firebase web app values.
+5. Install and run:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Seed Firestore
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Create a Firebase service account in Project Settings, then run:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+$env:FIREBASE_SERVICE_ACCOUNT='{"type":"service_account",...}'
+$env:SEED_ADMIN_EMAIL='shazidsaharia21@gmail.com'
+pnpm seed
+```
 
-## Learn More
+The seed uses the supplied BSc CSE syllabus for all eight semesters. Google Drive links are intentionally empty so they are never hardcoded in the frontend; add them from the Admin Dashboard.
 
-To learn more about Next.js, take a look at the following resources:
+## Deploy Rules
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+firebase deploy --only firestore:rules,storage
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Deploy the Next.js app to Vercel or Firebase App Hosting after adding the same environment variables there.

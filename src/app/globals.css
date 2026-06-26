@@ -2,7 +2,22 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #0f172a;
+  --muted: #64748b;
+  --card: #f8fafc;
+  --line: #e2e8f0;
+  --primary: #2563eb;
+  color-scheme: light;
+}
+
+.dark {
+  --background: #0f172a;
+  --foreground: #e2e8f0;
+  --muted: #94a3b8;
+  --card: #172033;
+  --line: #273449;
+  --primary: #60a5fa;
+  color-scheme: dark;
 }
 
 @theme inline {
@@ -12,15 +27,68 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+}
+
+button, a, input, textarea, select {
+  transition: all 180ms ease;
+}
+
+.glass {
+  background: color-mix(in srgb, var(--background) 84%, transparent);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--line);
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  box-shadow: 0 12px 40px rgba(15, 23, 42, 0.06);
+}
+
+.input {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--background);
+  padding: 12px 14px;
+  outline: none;
+}
+
+.input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary) 14%, transparent);
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 12px;
+  background: #2563eb;
+  color: white;
+  font-weight: 700;
+  padding: 12px 16px;
+}
+
+.btn-primary:hover {
+  background: #1d4ed8;
+}
+
+.btn-soft {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--background);
+  color: var(--foreground);
+  font-weight: 650;
+  padding: 10px 14px;
 }
