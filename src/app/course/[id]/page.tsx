@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 import { ExternalLink, FolderOpen } from "lucide-react";
@@ -11,19 +11,24 @@ import { db } from "@/lib/firebase";
 import { seedSubjects } from "@/lib/data";
 import type { Subject } from "@/lib/types";
 
+function subjectId(courseCode: string) {
+  return courseCode.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+}
+
 export default function CoursePage() {
   const { id } = useParams<{ id: string }>();
   const { user, profile } = useAuth();
-  const [course, setCourse] = useState<Subject | null>(null);
+  const fallbackCourse = useMemo(() => {
+    const fallback = seedSubjects.find((subject) => subjectId(subject.courseCode) === id);
+    return fallback ? ({ id, ...fallback } as Subject) : null;
+  }, [id]);
+  const [remoteCourse, setRemoteCourse] = useState<Subject | null>(null);
+  const course = remoteCourse?.id === id ? remoteCourse : fallbackCourse;
 
   useEffect(() => {
     if (!db || !id) return;
     getDoc(doc(db, "subjects", id)).then((snapshot) => {
-      if (snapshot.exists()) setCourse({ id: snapshot.id, ...snapshot.data() } as Subject);
-      else {
-        const fallback = seedSubjects.find((subject) => subject.courseCode.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") === id);
-        if (fallback) setCourse({ id, ...fallback });
-      }
+      if (snapshot.exists()) setRemoteCourse({ id: snapshot.id, ...snapshot.data() } as Subject);
     });
   }, [id]);
 

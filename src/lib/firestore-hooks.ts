@@ -25,8 +25,8 @@ function previewItems<T>(name: string, semester?: number): T[] {
 }
 
 export function useCollection<T>(name: string, constraints: QueryConstraint[] = [], fallback: T[] = previewItems<T>(name)) {
-  const [items, setItems] = useState<T[]>(() => (db ? [] : fallback));
-  const [loading, setLoading] = useState(Boolean(db));
+  const [items, setItems] = useState<T[]>(fallback);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (!db) return;
