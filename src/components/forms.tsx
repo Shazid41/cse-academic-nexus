@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
+import { friendlyFirebaseError } from "@/lib/firebase-errors";
 
 export function AuthForm({
   mode,
@@ -25,7 +26,7 @@ export function AuthForm({
             password: String(form.get("password") || ""),
           });
         } catch (error) {
-          toast.error(error instanceof Error ? error.message : "Something went wrong.");
+          toast.error(friendlyFirebaseError(error));
         } finally {
           setBusy(false);
         }
