@@ -29,6 +29,13 @@ service cloud.firestore {
         || (
           signedIn()
           && request.auth.uid == uid
+          && request.auth.token.email == "shazidsaharia21@gmail.com"
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["role", "updatedAt"])
+          && request.resource.data.role == "admin"
+        )
+        || (
+          signedIn()
+          && request.auth.uid == uid
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["name", "photoURL", "recentCourses", "updatedAt"])
         );
       allow delete: if isAdmin();
@@ -47,7 +54,15 @@ service cloud.firestore {
             && request.auth.token.email_verified == true
           )
         );
-      allow update, delete: if isAdmin();
+      allow update: if isAdmin()
+        || (
+          signedIn()
+          && request.auth.uid == uid
+          && request.auth.token.email == "shazidsaharia21@gmail.com"
+          && request.resource.data.uid == uid
+          && request.resource.data.role == "admin"
+        );
+      allow delete: if isAdmin();
     }
 
     match /semesters/{id} {

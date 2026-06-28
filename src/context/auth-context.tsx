@@ -60,7 +60,15 @@ async function ensureProfile(user: User): Promise<AppUser | null> {
   try {
     const ref = doc(db, "users", user.uid);
     const snap = await getDoc(ref);
-    if (snap.exists()) return snap.data() as AppUser;
+    if (snap.exists()) {
+      const existing = snap.data() as AppUser;
+      if (role === "admin" && existing.role !== "admin") {
+        await setDoc(ref, { role: "admin", updatedAt: serverTimestamp() }, { merge: true });
+        await setDoc(doc(db, "roles", user.uid), { uid: user.uid, email, role: "admin", updatedAt: serverTimestamp() }, { merge: true });
+        return { ...existing, role: "admin" };
+      }
+      return existing;
+    }
 
     await setDoc(ref, profile);
     await setDoc(doc(db, "roles", user.uid), { uid: user.uid, email, role, updatedAt: serverTimestamp() });
