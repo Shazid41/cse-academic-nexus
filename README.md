@@ -38,6 +38,14 @@ pnpm seed
 
 The seed uses the supplied BSc CSE syllabus for all eight semesters. Google Drive links are intentionally empty so they are never hardcoded in the frontend; add them from the Admin Dashboard.
 
+After `shazidsaharia21@gmail.com` signs up once, promote that account:
+
+```bash
+$env:FIREBASE_SERVICE_ACCOUNT='{"type":"service_account",...}'
+$env:ADMIN_EMAIL='shazidsaharia21@gmail.com'
+pnpm promote-admin
+```
+
 ## Deploy Rules
 
 ```bash

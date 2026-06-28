@@ -46,8 +46,7 @@ async function ensureProfile(user: User): Promise<AppUser | null> {
   if (snap.exists()) return snap.data() as AppUser;
 
   const email = user.email ?? "";
-  const adminEmail = process.env.NEXT_PUBLIC_INITIAL_ADMIN_EMAIL;
-  const role: Role = adminEmail && email.toLowerCase() === adminEmail.toLowerCase() ? "admin" : "student";
+  const role: Role = "student";
   const profile: AppUser = {
     uid: user.uid,
     name: user.displayName ?? email.split("@")[0],

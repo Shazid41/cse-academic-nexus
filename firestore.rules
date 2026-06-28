@@ -13,15 +13,27 @@ service cloud.firestore {
     }
 
     match /users/{uid} {
-      allow create: if signedIn() && request.auth.uid == uid;
+      allow create: if signedIn()
+        && request.auth.uid == uid
+        && request.resource.data.uid == uid
+        && request.resource.data.role == "student";
       allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
-      allow update: if signedIn() && (request.auth.uid == uid || isAdmin());
+      allow update: if isAdmin()
+        || (
+          signedIn()
+          && request.auth.uid == uid
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["name", "photoURL", "recentCourses", "updatedAt"])
+        );
       allow delete: if isAdmin();
     }
 
     match /roles/{uid} {
       allow read: if signedIn();
-      allow create, update, delete: if isAdmin();
+      allow create: if signedIn()
+        && request.auth.uid == uid
+        && request.resource.data.uid == uid
+        && request.resource.data.role == "student";
+      allow update, delete: if isAdmin();
     }
 
     match /semesters/{id} {
