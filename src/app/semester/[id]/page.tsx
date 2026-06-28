@@ -11,6 +11,7 @@ export default function SemesterPage() {
   const { items: semesters } = useSemesters();
   const { items: subjects, loading } = useSubjects(number);
   const semester = semesters.find((item) => item.number === number);
+  const semesterSubjects = subjects.filter((subject) => subject.semester === number);
 
   return (
     <AppShell>
@@ -25,7 +26,7 @@ export default function SemesterPage() {
       <section className="mt-8">
         <h2 className="mb-4 text-2xl font-bold">Subjects</h2>
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {loading ? [1,2,3,4,5,6].map((i) => <div key={i} className="h-36 animate-pulse rounded-2xl bg-slate-100" />) : subjects.map((subject) => <SubjectCard key={subject.id} subject={subject} />)}
+          {loading ? [1,2,3,4,5,6].map((i) => <div key={i} className="h-36 animate-pulse rounded-2xl bg-slate-100" />) : semesterSubjects.map((subject) => <SubjectCard key={subject.id} subject={subject} />)}
         </div>
       </section>
     </AppShell>

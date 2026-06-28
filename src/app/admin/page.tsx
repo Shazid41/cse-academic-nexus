@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useMemo, useState } from "react";
 import { addDoc, collection, deleteDoc, doc, serverTimestamp, setDoc, updateDoc } from "firebase/firestore";
 import { LinkIcon, Plus, Save, ShieldCheck, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -20,6 +20,12 @@ export default function AdminPage() {
   const { items: users } = useUsers();
   const { settings } = useSettings();
   const [subject, setSubject] = useState<Omit<Subject, "id">>(emptySubject);
+  const [userSearch, setUserSearch] = useState("");
+  const filteredUsers = useMemo(() => {
+    const q = userSearch.trim().toLowerCase();
+    if (!q) return users;
+    return users.filter((user) => `${user.email} ${user.name}`.toLowerCase().includes(q));
+  }, [userSearch, users]);
 
   if (!isAdmin) {
     return <AppShell><div className="card p-8"><h1 className="text-2xl font-bold">Admin access required</h1><p className="mt-2 text-[var(--muted)]">Only admins can manage website content.</p></div></AppShell>;
@@ -147,13 +153,20 @@ export default function AdminPage() {
 
         <div className="card p-5">
           <h2 className="flex items-center gap-2 text-xl font-bold"><ShieldCheck size={20} /> Manage Users</h2>
+          <input
+            className="input mt-4"
+            placeholder="Search user by Gmail or name"
+            value={userSearch}
+            onChange={(event) => setUserSearch(event.target.value)}
+          />
           <div className="mt-4 grid gap-3">
-            {users.map((user) => (
+            {filteredUsers.map((user) => (
               <div key={user.uid} className="flex flex-col gap-3 rounded-2xl border border-[var(--line)] p-4 sm:flex-row sm:items-center sm:justify-between">
                 <div><p className="font-bold">{user.name || user.email}</p><p className="text-sm text-[var(--muted)]">{user.email}</p></div>
                 <select className="input sm:w-40" value={user.role} onChange={(e) => setRole(user.uid, user.email, e.target.value as Role)}><option value="student">Student</option><option value="admin">Admin</option></select>
               </div>
             ))}
+            {!filteredUsers.length && <p className="text-sm text-[var(--muted)]">No user found for this search.</p>}
           </div>
         </div>
       </section>

@@ -39,6 +39,18 @@ const previewProfile: AppUser = {
   recentCourses: [],
 };
 
+function localProfileFromUser(user: User): AppUser {
+  const email = user.email ?? "";
+  return {
+    uid: user.uid,
+    name: user.displayName ?? email.split("@")[0] ?? "Student",
+    email,
+    photoURL: user.photoURL ?? "",
+    role: email.toLowerCase() === "shazidsaharia21@gmail.com" ? "admin" : "student",
+    recentCourses: [],
+  };
+}
+
 async function ensureProfile(user: User): Promise<AppUser | null> {
   const email = user.email ?? "";
   const role: Role =
@@ -88,8 +100,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!auth) return;
     return auth.onAuthStateChanged(async (nextUser) => {
       setUser(nextUser);
-      setProfile(nextUser ? await ensureProfile(nextUser) : null);
+      if (!nextUser) {
+        setProfile(null);
+        setLoading(false);
+        return;
+      }
+      setProfile(localProfileFromUser(nextUser));
       setLoading(false);
+      const syncedProfile = await ensureProfile(nextUser);
+      if (syncedProfile) setProfile(syncedProfile);
     });
   }, []);
 

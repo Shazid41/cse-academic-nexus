@@ -6,11 +6,15 @@ import { db } from "./firebase";
 import { defaultSettings, seedSemesters, seedSubjects } from "./data";
 import type { AppUser, Semester, SiteSettings, Subject } from "./types";
 
-function previewItems<T>(name: string): T[] {
+function subjectId(courseCode: string) {
+  return courseCode.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+}
+
+function previewItems<T>(name: string, semester?: number): T[] {
   if (name === "semesters") return seedSemesters as T[];
   if (name === "subjects") {
-    return seedSubjects.map((subject) => ({
-      id: subject.courseCode.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""),
+    return seedSubjects.filter((subject) => !semester || subject.semester === semester).map((subject) => ({
+      id: subjectId(subject.courseCode),
       ...subject,
     })) as T[];
   }
@@ -20,8 +24,8 @@ function previewItems<T>(name: string): T[] {
   return [];
 }
 
-export function useCollection<T>(name: string, constraints: QueryConstraint[] = []) {
-  const [items, setItems] = useState<T[]>(() => (db ? [] : previewItems<T>(name)));
+export function useCollection<T>(name: string, constraints: QueryConstraint[] = [], fallback: T[] = previewItems<T>(name)) {
+  const [items, setItems] = useState<T[]>(() => (db ? [] : fallback));
   const [loading, setLoading] = useState(Boolean(db));
 
   useEffect(() => {
@@ -29,27 +33,30 @@ export function useCollection<T>(name: string, constraints: QueryConstraint[] = 
     const q = query(collection(db, name), ...constraints);
     return onSnapshot(q, (snapshot) => {
       const data = snapshot.docs.map((item) => ({ id: item.id, ...item.data() }) as T);
-      setItems(data.length ? data : previewItems<T>(name));
+      setItems(data.length ? data : fallback);
       setLoading(false);
     });
-  }, [name, constraints]);
+  }, [name, constraints, fallback]);
 
   return { items, loading };
 }
 
 export function useSemesters() {
   const constraints = useMemo(() => [orderBy("number", "asc")], []);
-  return useCollection<Semester>("semesters", constraints);
+  const fallback = useMemo(() => previewItems<Semester>("semesters"), []);
+  return useCollection<Semester>("semesters", constraints, fallback);
 }
 
 export function useSubjects(semester?: number) {
   const constraints = useMemo(() => semester ? [where("semester", "==", semester), orderBy("courseCode", "asc")] : [orderBy("semester", "asc"), orderBy("courseCode", "asc")], [semester]);
-  return useCollection<Subject>("subjects", constraints);
+  const fallback = useMemo(() => previewItems<Subject>("subjects", semester), [semester]);
+  return useCollection<Subject>("subjects", constraints, fallback);
 }
 
 export function useUsers() {
   const constraints = useMemo(() => [orderBy("email", "asc")], []);
-  return useCollection<AppUser>("users", constraints);
+  const fallback = useMemo(() => previewItems<AppUser>("users"), []);
+  return useCollection<AppUser>("users", constraints, fallback);
 }
 
 export function useSettings() {
