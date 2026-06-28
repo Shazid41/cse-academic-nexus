@@ -14,7 +14,7 @@ export function friendlyFirebaseError(error: unknown) {
   }
 
   if (message.includes("auth/email-already-in-use")) {
-    return "This email already has an account. Please sign in instead.";
+    return "This email already has an account. Use Sign in, Continue with Google, or Forgot password.";
   }
 
   if (message.includes("auth/operation-not-allowed")) {

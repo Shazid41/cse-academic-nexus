@@ -7,7 +7,7 @@ Production-ready Next.js App Router portal for BSc CSE academic resources.
 - Firebase Authentication: Google, email/password, forgot password, email verification.
 - Role-based access: students read content, admins manage content.
 - Firestore collections: `users`, `roles`, `semesters`, `subjects`, `courseDetails`, `resources`, `settings`.
-- Firebase Storage uploads for class routine and exam routine/notice images.
+- Routine and notice image links managed from the Admin CMS without paid Firebase Storage.
 - Semester dashboard, course details pages, instant course search, profile and recent courses.
 - Admin CMS for homepage text, routine images, subject details, Google Drive links, deletion, and user roles.
 - Firestore and Storage security rules included.
@@ -17,7 +17,7 @@ Production-ready Next.js App Router portal for BSc CSE academic resources.
 
 1. Create a Firebase project.
 2. Enable Authentication providers: Email/Password and Google.
-3. Create Firestore Database and Firebase Storage.
+3. Create Firestore Database. Firebase Storage is optional and not required for the free setup.
 4. Copy `.env.example` to `.env.local` and fill in the Firebase web app values.
 5. Install and run:
 

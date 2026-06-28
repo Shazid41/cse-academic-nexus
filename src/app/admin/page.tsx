@@ -2,12 +2,11 @@
 
 import { FormEvent, useState } from "react";
 import { addDoc, collection, deleteDoc, doc, serverTimestamp, setDoc, updateDoc } from "firebase/firestore";
-import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
-import { ImageUp, Plus, Save, ShieldCheck, Trash2 } from "lucide-react";
+import { LinkIcon, Plus, Save, ShieldCheck, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/app-shell";
 import { useAuth } from "@/context/auth-context";
-import { db, storage } from "@/lib/firebase";
+import { db } from "@/lib/firebase";
 import { useSemesters, useSettings, useSubjects, useUsers } from "@/lib/firestore-hooks";
 import { defaultSettings, seedSemesters, seedSubjects } from "@/lib/data";
 import type { Role, Subject } from "@/lib/types";
@@ -53,13 +52,16 @@ export default function AdminPage() {
     toast.success("Subject updated.");
   }
 
-  async function uploadRoutine(semesterId: string, field: "classRoutineUrl" | "examRoutineUrl", file?: File) {
-    if (!storage || !db || !file) return;
-    const path = `semesters/${semesterId}/${field}-${file.lastModified}-${file.name}`;
-    const uploaded = await uploadBytes(ref(storage, path), file);
-    const url = await getDownloadURL(uploaded.ref);
-    await updateDoc(doc(db, "semesters", semesterId), { [field]: url, updatedAt: serverTimestamp() });
-    toast.success("Image uploaded.");
+  async function saveRoutineUrls(event: FormEvent<HTMLFormElement>, semesterId: string) {
+    event.preventDefault();
+    if (!db) return;
+    const form = new FormData(event.currentTarget);
+    await setDoc(doc(db, "semesters", semesterId), {
+      classRoutineUrl: form.get("classRoutineUrl"),
+      examRoutineUrl: form.get("examRoutineUrl"),
+      updatedAt: serverTimestamp(),
+    }, { merge: true });
+    toast.success("Routine image links updated.");
   }
 
   async function setRole(uid: string, email: string, role: Role) {
@@ -107,13 +109,17 @@ export default function AdminPage() {
 
         <div className="card p-5">
           <h2 className="text-xl font-bold">Semester Routine Images</h2>
+          <p className="mt-2 text-sm text-[var(--muted)]">Firebase Storage needs a paid upgrade, so paste public image links here instead.</p>
           <div className="mt-4 grid gap-4 md:grid-cols-2">
             {semesters.map((semester) => (
-              <div key={semester.id} className="rounded-2xl border border-[var(--line)] p-4">
+              <form key={semester.id} onSubmit={(event) => saveRoutineUrls(event, semester.id)} className="rounded-2xl border border-[var(--line)] p-4">
                 <h3 className="font-bold">{semester.title}</h3>
-                <label className="btn-soft mt-3 w-full cursor-pointer"><ImageUp size={17} /> Upload Class Routine<input hidden type="file" accept="image/*" onChange={(e) => uploadRoutine(semester.id, "classRoutineUrl", e.target.files?.[0])} /></label>
-                <label className="btn-soft mt-2 w-full cursor-pointer"><ImageUp size={17} /> Upload Exam Routine / Notice<input hidden type="file" accept="image/*" onChange={(e) => uploadRoutine(semester.id, "examRoutineUrl", e.target.files?.[0])} /></label>
-              </div>
+                <label className="mt-3 block text-sm font-semibold">Class Routine Image URL</label>
+                <input className="input mt-2" name="classRoutineUrl" defaultValue={semester.classRoutineUrl || ""} placeholder="https://..." />
+                <label className="mt-3 block text-sm font-semibold">Exam Routine / Notice Image URL</label>
+                <input className="input mt-2" name="examRoutineUrl" defaultValue={semester.examRoutineUrl || ""} placeholder="https://..." />
+                <button className="btn-soft mt-3 w-full"><LinkIcon size={17} /> Save Image Links</button>
+              </form>
             ))}
           </div>
         </div>

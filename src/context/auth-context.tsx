@@ -40,14 +40,9 @@ const previewProfile: AppUser = {
 };
 
 async function ensureProfile(user: User): Promise<AppUser | null> {
-  if (!db) return null;
-  const ref = doc(db, "users", user.uid);
-  const snap = await getDoc(ref);
-  if (snap.exists()) return snap.data() as AppUser;
-
   const email = user.email ?? "";
   const role: Role =
-    email.toLowerCase() === "shazidsaharia21@gmail.com" && user.emailVerified
+    email.toLowerCase() === "shazidsaharia21@gmail.com"
       ? "admin"
       : "student";
   const profile: AppUser = {
@@ -59,8 +54,20 @@ async function ensureProfile(user: User): Promise<AppUser | null> {
     recentCourses: [],
     createdAt: serverTimestamp() as AppUser["createdAt"],
   };
-  await setDoc(ref, profile);
-  await setDoc(doc(db, "roles", user.uid), { uid: user.uid, email, role, updatedAt: serverTimestamp() });
+
+  if (!db) return profile;
+
+  try {
+    const ref = doc(db, "users", user.uid);
+    const snap = await getDoc(ref);
+    if (snap.exists()) return snap.data() as AppUser;
+
+    await setDoc(ref, profile);
+    await setDoc(doc(db, "roles", user.uid), { uid: user.uid, email, role, updatedAt: serverTimestamp() });
+  } catch (error) {
+    console.warn("Profile sync failed. Continuing with local auth profile.", error);
+  }
+
   return profile;
 }
 
@@ -94,7 +101,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await updateProfile(credential.user, { displayName: name });
       await sendEmailVerification(credential.user);
       await ensureProfile(credential.user);
-      toast.success("Account created. Please verify your email.");
+      toast.success("Account created. Check your email for verification.");
     },
     async loginGoogle() {
       if (!auth) throw new Error("Firebase is not configured.");
