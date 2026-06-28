@@ -31,11 +31,19 @@ export function useCollection<T>(name: string, constraints: QueryConstraint[] = 
   useEffect(() => {
     if (!db) return;
     const q = query(collection(db, name), ...constraints);
-    return onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map((item) => ({ id: item.id, ...item.data() }) as T);
-      setItems(data.length ? data : fallback);
-      setLoading(false);
-    });
+    return onSnapshot(
+      q,
+      (snapshot) => {
+        const data = snapshot.docs.map((item) => ({ id: item.id, ...item.data() }) as T);
+        setItems(data.length ? data : fallback);
+        setLoading(false);
+      },
+      (error) => {
+        console.warn(`Firestore ${name} subscription failed. Using local fallback.`, error);
+        setItems(fallback);
+        setLoading(false);
+      },
+    );
   }, [name, constraints, fallback]);
 
   return { items, loading };
@@ -48,9 +56,11 @@ export function useSemesters() {
 }
 
 export function useSubjects(semester?: number) {
-  const constraints = useMemo(() => semester ? [where("semester", "==", semester), orderBy("courseCode", "asc")] : [orderBy("semester", "asc"), orderBy("courseCode", "asc")], [semester]);
+  const constraints = useMemo(() => semester ? [where("semester", "==", semester)] : [], [semester]);
   const fallback = useMemo(() => previewItems<Subject>("subjects", semester), [semester]);
-  return useCollection<Subject>("subjects", constraints, fallback);
+  const result = useCollection<Subject>("subjects", constraints, fallback);
+  const sortedItems = useMemo(() => [...result.items].sort((a, b) => a.semester - b.semester || a.courseCode.localeCompare(b.courseCode)), [result.items]);
+  return { ...result, items: sortedItems };
 }
 
 export function useUsers() {
