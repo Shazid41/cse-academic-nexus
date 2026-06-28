@@ -9,6 +9,7 @@ import { AppShell } from "@/components/app-shell";
 import { useAuth } from "@/context/auth-context";
 import { db, storage } from "@/lib/firebase";
 import { useSemesters, useSettings, useSubjects, useUsers } from "@/lib/firestore-hooks";
+import { defaultSettings, seedSemesters, seedSubjects } from "@/lib/data";
 import type { Role, Subject } from "@/lib/types";
 
 const emptySubject = { courseCode: "", courseTitle: "", semester: 1, description: "", credits: 3, teacher: "", driveLink: "" };
@@ -68,11 +69,31 @@ export default function AdminPage() {
     toast.success("User role updated.");
   }
 
+  async function bootstrapSyllabus() {
+    if (!db) return;
+    const database = db;
+    const now = serverTimestamp();
+    await setDoc(doc(database, "settings", "site"), { ...defaultSettings, updatedAt: now }, { merge: true });
+    await Promise.all(seedSemesters.map((semester) =>
+      setDoc(doc(database, "semesters", semester.id), { ...semester, createdAt: now, updatedAt: now }, { merge: true }),
+    ));
+    await Promise.all(seedSubjects.map((item) => {
+      const id = item.courseCode.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+      return Promise.all([
+        setDoc(doc(database, "subjects", id), { ...item, createdAt: now, updatedAt: now }, { merge: true }),
+        setDoc(doc(database, "resources", id), { subjectId: id, driveLink: item.driveLink || "", updatedAt: now }, { merge: true }),
+        setDoc(doc(database, "courseDetails", id), { subjectId: id, description: item.description, updatedAt: now }, { merge: true }),
+      ]);
+    }));
+    toast.success("Syllabus data added to Firestore.");
+  }
+
   return (
     <AppShell>
       <div className="mb-6">
         <p className="font-bold text-blue-600">Admin CMS</p>
         <h1 className="mt-2 text-3xl font-bold md:text-4xl">Manage academic portal</h1>
+        <button className="btn-primary mt-4" onClick={bootstrapSyllabus}>Seed syllabus into Firestore</button>
       </div>
 
       <section className="grid gap-6">

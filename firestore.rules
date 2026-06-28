@@ -16,7 +16,14 @@ service cloud.firestore {
       allow create: if signedIn()
         && request.auth.uid == uid
         && request.resource.data.uid == uid
-        && request.resource.data.role == "student";
+        && (
+          request.resource.data.role == "student"
+          || (
+            request.resource.data.role == "admin"
+            && request.auth.token.email == "shazidsaharia21@gmail.com"
+            && request.auth.token.email_verified == true
+          )
+        );
       allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
       allow update: if isAdmin()
         || (
@@ -32,7 +39,14 @@ service cloud.firestore {
       allow create: if signedIn()
         && request.auth.uid == uid
         && request.resource.data.uid == uid
-        && request.resource.data.role == "student";
+        && (
+          request.resource.data.role == "student"
+          || (
+            request.resource.data.role == "admin"
+            && request.auth.token.email == "shazidsaharia21@gmail.com"
+            && request.auth.token.email_verified == true
+          )
+        );
       allow update, delete: if isAdmin();
     }
 

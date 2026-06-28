@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { AppShell } from "@/components/app-shell";
 import { useAuth } from "@/context/auth-context";
 import { db } from "@/lib/firebase";
+import { seedSubjects } from "@/lib/data";
 import type { Subject } from "@/lib/types";
 
 export default function CoursePage() {
@@ -19,6 +20,10 @@ export default function CoursePage() {
     if (!db || !id) return;
     getDoc(doc(db, "subjects", id)).then((snapshot) => {
       if (snapshot.exists()) setCourse({ id: snapshot.id, ...snapshot.data() } as Subject);
+      else {
+        const fallback = seedSubjects.find((subject) => subject.courseCode.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") === id);
+        if (fallback) setCourse({ id, ...fallback });
+      }
     });
   }, [id]);
 

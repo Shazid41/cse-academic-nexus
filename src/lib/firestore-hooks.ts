@@ -28,7 +28,8 @@ export function useCollection<T>(name: string, constraints: QueryConstraint[] = 
     if (!db) return;
     const q = query(collection(db, name), ...constraints);
     return onSnapshot(q, (snapshot) => {
-      setItems(snapshot.docs.map((item) => ({ id: item.id, ...item.data() }) as T));
+      const data = snapshot.docs.map((item) => ({ id: item.id, ...item.data() }) as T);
+      setItems(data.length ? data : previewItems<T>(name));
       setLoading(false);
     });
   }, [name, constraints]);

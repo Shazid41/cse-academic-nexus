@@ -39,12 +39,12 @@ jobs:
         run: pnpm build
         env:
           GITHUB_PAGES: "true"
-          NEXT_PUBLIC_FIREBASE_API_KEY: ${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}
-          NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: ${{ secrets.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN }}
-          NEXT_PUBLIC_FIREBASE_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_PROJECT_ID }}
-          NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: ${{ secrets.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET }}
-          NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}
-          NEXT_PUBLIC_FIREBASE_APP_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_APP_ID }}
+          NEXT_PUBLIC_FIREBASE_API_KEY: "AIzaSyCpJqHawsxVkf9n42BEE2NoswRzy-CDwGA"
+          NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: "cse-academic-nexus.firebaseapp.com"
+          NEXT_PUBLIC_FIREBASE_PROJECT_ID: "cse-academic-nexus"
+          NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: "cse-academic-nexus.firebasestorage.app"
+          NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: "345716291103"
+          NEXT_PUBLIC_FIREBASE_APP_ID: "1:345716291103:web:c08cacccde61add458872a"
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
